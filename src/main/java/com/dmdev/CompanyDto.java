@@ -3,7 +3,7 @@ package com.dmdev;
 import lombok.Value;
 
 @Value
-public class CusstomDto {
+public class CompanyDto {
      String name;
     Double amount;
 }
