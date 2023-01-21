@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
@@ -59,6 +60,7 @@ public class User implements Comparable<User>, BaseEntity<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id") // company_id
+    @BatchSize(size = 1) //not work this Monyto one
     private Company company;
 
     @OneToOne(
@@ -70,6 +72,7 @@ public class User implements Comparable<User>, BaseEntity<Long> {
 
     @Builder.Default
     @OneToMany(mappedBy = "user")
+    @BatchSize(size = 1)
     private List<UserChat> userChats = new ArrayList<>();
 
     @Builder.Default
