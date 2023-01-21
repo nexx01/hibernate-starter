@@ -27,16 +27,20 @@ public class HibernateRunner {
             try (session1) {
 //                TestDataImporter.importData(sessionFactory);
                 Transaction transaction = session1.beginTransaction();
+                session1.enableFetchProfile("withCompanyAndPayments");
+////                session1.save(user);
+//                List<User> users = session1.createQuery("select u from User u " +
+//                                "join fetch u.payments" +
+//                                " join fetch u.company " +
+//                                "where 1=1", User.class)
+//                        .list();
+                User user1 = session1.get(User.class, 1L);
+                System.out.println(user1.getCompany().getName());
+                System.out.println(user1.getPayments());
 
-//                session1.save(user);
-                List<User> users = session1.createQuery("select u from User u " +
-                                "join fetch u.payments" +
-                                " join fetch u.company " +
-                                "where 1=1", User.class)
-                        .list();
 
-                users.forEach(user -> System.out.println(user.getPayments().size()));
-                users.forEach(user -> System.out.println(user.getCompany().getName()));
+//                users.forEach(user -> System.out.println(user.getPayments().size()));
+//                users.forEach(user -> System.out.println(user.getCompany().getName()));
 
                 session1.getTransaction().commit();
             }
@@ -112,6 +116,9 @@ public class HibernateRunner {
  *
  * ограничения Fetch , fetch join -  могут использоваться  только с коллекциец
  бесполезны если маппинг по одной сущности
+ *
+ *
+ * @FetchProfile - для работы с одной сущщностью
  */
 
 

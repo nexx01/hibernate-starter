@@ -7,10 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.*;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;
@@ -41,6 +38,14 @@ import static com.dmdev.util.StringUtils.SPACE;
 @Entity
 @Table(name = "users", schema = "public")
 @TypeDef(name = "dmdev", typeClass = JsonBinaryType.class)
+@FetchProfile(name = "withCompanyAndPayments", fetchOverrides = {
+        @FetchProfile.FetchOverride(
+                entity = User.class,association = "company",mode=FetchMode.JOIN
+        ),
+        @FetchProfile.FetchOverride(
+                entity = User.class,association = "payments",mode=FetchMode.JOIN
+        )
+})
 public class User implements Comparable<User>, BaseEntity<Long> {
 
     @Id
