@@ -2,15 +2,22 @@ package com.dmdev;
 
 import com.dmdev.entity.Company;
 import com.dmdev.entity.User;
+import com.dmdev.entity.UserChat;
 import com.dmdev.util.HibernateUtil;
 import com.dmdev.util.TestDataImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.graph.GraphSemantic;
+import org.hibernate.graph.RootGraph;
+import org.hibernate.graph.SubGraph;
+import org.hibernate.jpa.QueryHints;
 
+import javax.persistence.QueryHint;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class HibernateRunner {
@@ -27,19 +34,57 @@ public class HibernateRunner {
             try (session1) {
 //                TestDataImporter.importData(sessionFactory);
                 Transaction transaction = session1.beginTransaction();
-                session1.enableFetchProfile("withCompanyAndPayments");
+
+                System.out.println("----------------Without Annotation EntityGrath----------------");
+
+                RootGraph<User> entityGraph = session1.createEntityGraph(
+                        User.class
+                );
+                entityGraph.addAttributeNodes("company", "userChats");
+                SubGraph<UserChat> userChats = entityGraph.addSubGraph("userChats", UserChat.class);
+                userChats.addAttributeNodes("chat");
+
+//                session1.enableFetchProfile("withCompanyAndPayments");
 ////                session1.save(user);
-//                List<User> users = session1.createQuery("select u from User u " +
-//                                "join fetch u.payments" +
-//                                " join fetch u.company " +
-//                                "where 1=1", User.class)
-//                        .list();
-                User user1 = session1.get(User.class, 1L);
+
+                Map<String, Object> properties = Map.of(
+                        GraphSemantic.LOAD.getJpaHintName(), entityGraph);
+
+                User user1 = session1.find(User.class, 1L,properties);
+
                 System.out.println(user1.getCompany().getName());
+                System.out.println(user1.getUserChats().size());
                 System.out.println(user1.getPayments());
 
+                List<User> users = session1.createQuery("select u from User u " +
+                                "where 1=1", User.class)
+                        .setHint(GraphSemantic.LOAD.getJpaHintName(),entityGraph)
+                        .list();
+                users.forEach(user -> System.out.println(user.getUserChats().size()));
+                users.forEach(user -> System.out.println(user.getCompany().getName()));
 
-//                users.forEach(user -> System.out.println(user.getPayments().size()));
+
+                System.out.println("----------------------------------------------");
+                System.out.println("----------------------------------------------");
+                System.out.println("----------------------------------------------");
+                System.out.println("----------------With Annotation EntityGrath----------------");
+//                ---------------------------------------------------/
+                //with annotation
+//
+//                Map<String, Object> properties3 = Map.of(
+//                        GraphSemantic.LOAD.getJpaHintName(), session1.getEntityGraph("withCompanyAndChat"));
+//
+//                User user3 = session1.find(User.class, 1L,properties3);
+//
+//                System.out.println(user3.getCompany().getName());
+//                System.out.println(user3.getUserChats().size());
+//                System.out.println(user3.getPayments());
+//
+//                List<User> users3 = session1.createQuery("select u from User u " +
+//                                "where 1=1", User.class)
+//                        .setHint(GraphSemantic.LOAD.getJpaHintName(),session1.getEntityGraph("withCompanyAndChat"))
+//                        .list();
+//                users.forEach(user -> System.out.println(user.getUserChats().size()));
 //                users.forEach(user -> System.out.println(user.getCompany().getName()));
 
                 session1.getTransaction().commit();
