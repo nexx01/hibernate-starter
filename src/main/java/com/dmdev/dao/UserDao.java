@@ -106,6 +106,7 @@ public class UserDao {
                 .select(payment)
                 .from(payment)
                 .join(payment.receiver,user)
+                .fetchJoin() //нужен чтобы сделать один запрос
                 .join(user.company,company)
                 .where(company.name.eq(companyName))
                 .orderBy(user.personalInfo.firstname.asc(),payment.amount.asc())

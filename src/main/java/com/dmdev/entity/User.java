@@ -76,7 +76,7 @@ public class User implements Comparable<User>, BaseEntity<Long> {
 
     @Builder.Default
     @OneToMany(mappedBy = "receiver")
-    @Fetch(FetchMode.SUBSELECT)
+//    @Fetch(FetchMode.SUBSELECT)
     private List<Payment> payments = new ArrayList<>();
 
     @Override
