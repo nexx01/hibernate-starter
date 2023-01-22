@@ -1,10 +1,8 @@
 package com.dmdev;
 
-import com.dmdev.entity.Company;
 import com.dmdev.entity.User;
 import com.dmdev.entity.UserChat;
 import com.dmdev.util.HibernateUtil;
-import com.dmdev.util.TestDataImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -12,9 +10,7 @@ import org.hibernate.Transaction;
 import org.hibernate.graph.GraphSemantic;
 import org.hibernate.graph.RootGraph;
 import org.hibernate.graph.SubGraph;
-import org.hibernate.jpa.QueryHints;
 
-import javax.persistence.QueryHint;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +46,7 @@ public class HibernateRunner {
                 Map<String, Object> properties = Map.of(
                         GraphSemantic.LOAD.getJpaHintName(), entityGraph);
 
-                User user1 = session1.find(User.class, 1L,properties);
+                User user1 = session1.find(User.class, 1L, properties);
 
                 System.out.println(user1.getCompany().getName());
                 System.out.println(user1.getUserChats().size());
@@ -58,7 +54,7 @@ public class HibernateRunner {
 
                 List<User> users = session1.createQuery("select u from User u " +
                                 "where 1=1", User.class)
-                        .setHint(GraphSemantic.LOAD.getJpaHintName(),entityGraph)
+                        .setHint(GraphSemantic.LOAD.getJpaHintName(), entityGraph)
                         .list();
                 users.forEach(user -> System.out.println(user.getUserChats().size()));
                 users.forEach(user -> System.out.println(user.getCompany().getName()));
@@ -94,6 +90,20 @@ public class HibernateRunner {
 }
 
 
+/**
+ * 1. Avoid @OneOnOne bidirectional (если ключ натуральный можно у зависимой(fetch.Lazy+ optinal.false))
+ * (как бы не оптимизировали все равно будем его получать)
+ * 2. Use fetch type LAZY everywhere
+ * 3.Don't prefer @BatchSize, @Fetch
+ * 4. Use query fetch (Hql, Criteria Api , QueryDsl)( но он не работает в query by id)
+ * 5. Prefer EntityGraph Api than @FetchProfile
+ *
+ *
+ * ! преждевременное улушчшение производительность ухуджает
+ * скорость разрабо тки приложения и убиать суть hibernate
+ * быстрая разработка приложения и работа с бд
+ * !Сначала бизнес логика потом оптимизация
+ */
 
 /*
  *  save + why deprecate + когда делается запрос
