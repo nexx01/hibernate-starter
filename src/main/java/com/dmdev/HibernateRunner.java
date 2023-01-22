@@ -35,25 +35,28 @@ session1.doWork(new Work() {
 
 //                TestDataImporter.importData(sessionFactory);
                 session1.beginTransaction();
-            session2.beginTransaction();
+//            session1.setDefaultReadOnly(true);
 
-            session1.createQuery("select p from Payment  p")
-                    .setLockMode(LockModeType.PESSIMISTIC_FORCE_INCREMENT)
-                    .setHint("javax.persistence.lock.timeout", 5000)
-//                    .setTimeout(11)
-                    .list();
+            session1.createNativeQuery("SET TRANSACTION READ ONLY ").executeUpdate();
+////
+//            session1.createQuery("select p from Payment  p")
+////                    .setLockMode(LockModeType.PESSIMISTIC_FORCE_INCREMENT)
+////                    .setHint("javax.persistence.lock.timeout", 5000)
+//////                    .setTimeout(11)
+//                    .setReadOnly(true)
+////                    .setHint(QueryHints.HINT_READONLY,true)
+//                    .list();
 
                 Payment payment = session1.find(Payment
-                        .class, 1L,LockModeType.PESSIMISTIC_FORCE_INCREMENT);
-//                session1.get()
+                        .class, 1L);
                 payment.setAmount(payment.getAmount() + 10);
 
+//
+//            Payment theSamepayment = session2.find(Payment
+//                    .class, 1L);
+//            theSamepayment.setAmount(theSamepayment.getAmount() + 20);
 
-            Payment theSamepayment = session2.find(Payment
-                    .class, 1L);
-            theSamepayment.setAmount(theSamepayment.getAmount() + 20);
-
-            session2.getTransaction().commit();
+//            session2.getTransaction().commit();
             session1.getTransaction().commit();
 
 //                try {
