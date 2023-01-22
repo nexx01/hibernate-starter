@@ -1,93 +1,72 @@
 package com.dmdev;
 
-import com.dmdev.entity.User;
-import com.dmdev.entity.UserChat;
+import com.dmdev.entity.Payment;
 import com.dmdev.util.HibernateUtil;
+import com.dmdev.util.TestDataImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.graph.GraphSemantic;
-import org.hibernate.graph.RootGraph;
-import org.hibernate.graph.SubGraph;
+import org.hibernate.jdbc.Work;
 
+import javax.persistence.LockModeType;
+import javax.transaction.Transactional;
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 public class HibernateRunner {
 
+
+//    @Transactional
     public static void main(String[] args) throws SQLException {
-//        Company company = Company.builder()
-//                .name("Amazon")
-//                .build();
-//        User user = null;
 
-
-        try (SessionFactory sessionFactory = HibernateUtil.buildSessionFactory()) {
+        try (SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
             Session session1 = sessionFactory.openSession();
-            try (session1) {
+            Session session2=sessionFactory.openSession()){
+session1.doWork(new Work() {
+    @Override
+    public void execute(Connection connection) throws SQLException {
+        System.out.println("Текущий уровень изолированости: "+connection.getTransactionIsolation());
+    }
+});
+
+
 //                TestDataImporter.importData(sessionFactory);
-                Transaction transaction = session1.beginTransaction();
-
-                System.out.println("----------------Without Annotation EntityGrath----------------");
-
-                RootGraph<User> entityGraph = session1.createEntityGraph(
-                        User.class
-                );
-                entityGraph.addAttributeNodes("company", "userChats");
-                SubGraph<UserChat> userChats = entityGraph.addSubGraph("userChats", UserChat.class);
-                userChats.addAttributeNodes("chat");
-
-//                session1.enableFetchProfile("withCompanyAndPayments");
-////                session1.save(user);
-
-                Map<String, Object> properties = Map.of(
-                        GraphSemantic.LOAD.getJpaHintName(), entityGraph);
-
-                User user1 = session1.find(User.class, 1L, properties);
-
-                System.out.println(user1.getCompany().getName());
-                System.out.println(user1.getUserChats().size());
-                System.out.println(user1.getPayments());
-
-                List<User> users = session1.createQuery("select u from User u " +
-                                "where 1=1", User.class)
-                        .setHint(GraphSemantic.LOAD.getJpaHintName(), entityGraph)
-                        .list();
-                users.forEach(user -> System.out.println(user.getUserChats().size()));
-                users.forEach(user -> System.out.println(user.getCompany().getName()));
+                session1.beginTransaction();
+            session2.beginTransaction();
 
 
-                System.out.println("----------------------------------------------");
-                System.out.println("----------------------------------------------");
-                System.out.println("----------------------------------------------");
-                System.out.println("----------------With Annotation EntityGrath----------------");
-//                ---------------------------------------------------/
-                //with annotation
-//
-//                Map<String, Object> properties3 = Map.of(
-//                        GraphSemantic.LOAD.getJpaHintName(), session1.getEntityGraph("withCompanyAndChat"));
-//
-//                User user3 = session1.find(User.class, 1L,properties3);
-//
-//                System.out.println(user3.getCompany().getName());
-//                System.out.println(user3.getUserChats().size());
-//                System.out.println(user3.getPayments());
-//
-//                List<User> users3 = session1.createQuery("select u from User u " +
-//                                "where 1=1", User.class)
-//                        .setHint(GraphSemantic.LOAD.getJpaHintName(),session1.getEntityGraph("withCompanyAndChat"))
-//                        .list();
-//                users.forEach(user -> System.out.println(user.getUserChats().size()));
-//                users.forEach(user -> System.out.println(user.getCompany().getName()));
+
+                Payment payment = session1.find(Payment
+                        .class, 1L, LockModeType.OPTIMISTIC);
+                payment.setAmount(payment.getAmount() + 10);
+
+
+            Payment theSamepayment = session2.find(Payment
+                    .class, 1L, LockModeType.OPTIMISTIC);
+            theSamepayment.setAmount(theSamepayment.getAmount() + 20);
 
                 session1.getTransaction().commit();
+            session2.getTransaction().commit();
+
+//                try {
+//                    Transaction transaction = session1.beginTransaction();
+//
+//                    Payment payment1 = session1.find(Payment.class, 1L);
+//                    Payment payment2 = session1.find(Payment.class, 2L);
+//
+//
+//                    session1.getTransaction().commit();
+//                } catch (Exception e) {
+//                    session1.getTransaction().rollback();
+//                    throw e;
+//                }
+////                session1.save()
             }
         }
     }
-}
+
 
 
 /**
@@ -97,8 +76,8 @@ public class HibernateRunner {
  * 3.Don't prefer @BatchSize, @Fetch
  * 4. Use query fetch (Hql, Criteria Api , QueryDsl)( но он не работает в query by id)
  * 5. Prefer EntityGraph Api than @FetchProfile
- *
- *
+ * <p>
+ * <p>
  * ! преждевременное улушчшение производительность ухуджает
  * скорость разрабо тки приложения и убиать суть hibernate
  * быстрая разработка приложения и работа с бд
