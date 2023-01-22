@@ -8,6 +8,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.jdbc.Work;
+import org.hibernate.jpa.QueryHints;
 
 import javax.persistence.LockModeType;
 import javax.transaction.Transactional;
@@ -36,19 +37,24 @@ session1.doWork(new Work() {
                 session1.beginTransaction();
             session2.beginTransaction();
 
-
+            session1.createQuery("select p from Payment  p")
+                    .setLockMode(LockModeType.PESSIMISTIC_FORCE_INCREMENT)
+                    .setHint("javax.persistence.lock.timeout", 5000)
+//                    .setTimeout(11)
+                    .list();
 
                 Payment payment = session1.find(Payment
-                        .class, 1L, LockModeType.OPTIMISTIC);
+                        .class, 1L,LockModeType.PESSIMISTIC_FORCE_INCREMENT);
+//                session1.get()
                 payment.setAmount(payment.getAmount() + 10);
 
 
             Payment theSamepayment = session2.find(Payment
-                    .class, 1L, LockModeType.OPTIMISTIC);
+                    .class, 1L);
             theSamepayment.setAmount(theSamepayment.getAmount() + 20);
 
-                session1.getTransaction().commit();
             session2.getTransaction().commit();
+            session1.getTransaction().commit();
 
 //                try {
 //                    Transaction transaction = session1.beginTransaction();
@@ -66,7 +72,7 @@ session1.doWork(new Work() {
             }
         }
     }
-
+/*/
 
 
 /**
@@ -153,6 +159,9 @@ session1.doWork(new Work() {
  *
  *
  * @FetchProfile - для работы с одной сущщностью
+ *
+ *
+ * for update, for share
  */
 
 
