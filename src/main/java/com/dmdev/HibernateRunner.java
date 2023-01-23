@@ -1,17 +1,14 @@
 package com.dmdev;
 
 import com.dmdev.entity.Payment;
+import com.dmdev.entity.Profile;
+import com.dmdev.entity.User;
 import com.dmdev.util.HibernateUtil;
-import com.dmdev.util.TestDataImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.jdbc.Work;
-import org.hibernate.jpa.QueryHints;
 
-import javax.persistence.LockModeType;
-import javax.transaction.Transactional;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -31,25 +28,48 @@ session1.doWork(new Work() {
         System.out.println("Текущий уровень изолированости: "+connection.getTransactionIsolation());
     }
 });
+//
+//
+//session1.doWork(new Work() {
+//    @Override
+//    public void execute(Connection connection) throws SQLException {
+//        connection.setAutoCommit(false);
+//    }
+//});
+
+
+
 
 
 //                TestDataImporter.importData(sessionFactory);
-                session1.beginTransaction();
+//                session1.beginTransaction();
 //            session1.setDefaultReadOnly(true);
 
-            session1.createNativeQuery("SET TRANSACTION READ ONLY ").executeUpdate();
+//            session1.createNativeQuery("SET TRANSACTION READ ONLY ").executeUpdate();
 ////
-//            session1.createQuery("select p from Payment  p")
+            session1.createQuery("select p from Payment  p")
 ////                    .setLockMode(LockModeType.PESSIMISTIC_FORCE_INCREMENT)
 ////                    .setHint("javax.persistence.lock.timeout", 5000)
 //////                    .setTimeout(11)
 //                    .setReadOnly(true)
 ////                    .setHint(QueryHints.HINT_READONLY,true)
-//                    .list();
+                    .list();
 
-                Payment payment = session1.find(Payment
+            Payment payment = session1.find(Payment
                         .class, 1L);
-                payment.setAmount(payment.getAmount() + 10);
+            payment.setAmount(payment.getAmount()+1);
+//            session1.save(payment);
+//            session1.flush();
+
+            Profile build = Profile.builder()
+                    .user(session1.find(User.class, 1L))
+                    .language("ru")
+                    .street("kolesa ")
+                    .build();
+            session1.save(build);
+            session1.flush();
+
+//                payment.PsetAmount(payment.getAmount() + 10);
 
 //
 //            Payment theSamepayment = session2.find(Payment
@@ -57,7 +77,7 @@ session1.doWork(new Work() {
 //            theSamepayment.setAmount(theSamepayment.getAmount() + 20);
 
 //            session2.getTransaction().commit();
-            session1.getTransaction().commit();
+//            session1.getTransaction().commit();
 
 //                try {
 //                    Transaction transaction = session1.beginTransaction();
@@ -88,7 +108,7 @@ session1.doWork(new Work() {
  * <p>
  * <p>
  * ! преждевременное улушчшение производительность ухуджает
- * скорость разрабо тки приложения и убиать суть hibernate
+ * скорость разработки приложения и убиать суть hibernate
  * быстрая разработка приложения и работа с бд
  * !Сначала бизнес логика потом оптимизация
  */
@@ -165,6 +185,8 @@ session1.doWork(new Work() {
  *
  *
  * for update, for share
+ *
+ * autoCommitMode
  */
 
 
