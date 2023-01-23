@@ -1,10 +1,7 @@
 package com.dmdev.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import com.dmdev.listeners.UserChatListener;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -15,6 +12,8 @@ import javax.persistence.*;
 @Builder
 @Entity
 @Table(name = "users_chat")
+@EntityListeners(UserChatListener.class
+)
 public class UserChat extends AuditableEntity<Long> {
 
     @Id

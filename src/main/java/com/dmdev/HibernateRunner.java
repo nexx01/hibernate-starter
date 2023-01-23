@@ -1,23 +1,19 @@
 package com.dmdev;
 
 import com.dmdev.entity.Payment;
-import com.dmdev.entity.Profile;
-import com.dmdev.entity.User;
 import com.dmdev.util.HibernateUtil;
 import com.dmdev.util.TestDataImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.jdbc.Work;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 @Slf4j
 public class HibernateRunner {
 
 
-//    @Transactional
+    //    @Transactional
     public static void main(String[] args) throws SQLException {
 
         try (SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
@@ -31,14 +27,14 @@ public class HibernateRunner {
             Payment payment = session1.find(Payment
                     .class, 1L);
 
-            payment.setAmount(payment.getAmount()+1);
+            payment.setAmount(payment.getAmount() + 1);
             session1.save(payment);
 
             session1.getTransaction().commit();
 
         }
-        }
     }
+}
 /*/
 
 
