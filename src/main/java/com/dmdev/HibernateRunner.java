@@ -4,6 +4,7 @@ import com.dmdev.entity.Payment;
 import com.dmdev.entity.Profile;
 import com.dmdev.entity.User;
 import com.dmdev.util.HibernateUtil;
+import com.dmdev.util.TestDataImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -20,79 +21,22 @@ public class HibernateRunner {
     public static void main(String[] args) throws SQLException {
 
         try (SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
-            Session session1 = sessionFactory.openSession();
-            Session session2=sessionFactory.openSession()){
-session1.doWork(new Work() {
-    @Override
-    public void execute(Connection connection) throws SQLException {
-        System.out.println("Текущий уровень изолированости: "+connection.getTransactionIsolation());
-    }
-});
-//
-//
-//session1.doWork(new Work() {
-//    @Override
-//    public void execute(Connection connection) throws SQLException {
-//        connection.setAutoCommit(false);
-//    }
-//});
-
-
-
-
-
-//                TestDataImporter.importData(sessionFactory);
-//                session1.beginTransaction();
-//            session1.setDefaultReadOnly(true);
-
-//            session1.createNativeQuery("SET TRANSACTION READ ONLY ").executeUpdate();
-////
+             Session session1 = sessionFactory.openSession();
+             Session session2 = sessionFactory.openSession()) {
+            TestDataImporter.importData(sessionFactory);
+            session1.beginTransaction();
             session1.createQuery("select p from Payment  p")
-////                    .setLockMode(LockModeType.PESSIMISTIC_FORCE_INCREMENT)
-////                    .setHint("javax.persistence.lock.timeout", 5000)
-//////                    .setTimeout(11)
-//                    .setReadOnly(true)
-////                    .setHint(QueryHints.HINT_READONLY,true)
                     .list();
 
             Payment payment = session1.find(Payment
-                        .class, 1L);
+                    .class, 1L);
+
             payment.setAmount(payment.getAmount()+1);
-//            session1.save(payment);
-//            session1.flush();
+            session1.save(payment);
 
-            Profile build = Profile.builder()
-                    .user(session1.find(User.class, 1L))
-                    .language("ru")
-                    .street("kolesa ")
-                    .build();
-            session1.save(build);
-            session1.flush();
+            session1.getTransaction().commit();
 
-//                payment.PsetAmount(payment.getAmount() + 10);
-
-//
-//            Payment theSamepayment = session2.find(Payment
-//                    .class, 1L);
-//            theSamepayment.setAmount(theSamepayment.getAmount() + 20);
-
-//            session2.getTransaction().commit();
-//            session1.getTransaction().commit();
-
-//                try {
-//                    Transaction transaction = session1.beginTransaction();
-//
-//                    Payment payment1 = session1.find(Payment.class, 1L);
-//                    Payment payment2 = session1.find(Payment.class, 2L);
-//
-//
-//                    session1.getTransaction().commit();
-//                } catch (Exception e) {
-//                    session1.getTransaction().rollback();
-//                    throw e;
-//                }
-////                session1.save()
-            }
+        }
         }
     }
 /*/
