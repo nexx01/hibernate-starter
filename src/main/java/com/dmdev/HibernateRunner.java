@@ -1,6 +1,9 @@
 package com.dmdev;
 
 import com.dmdev.entity.Payment;
+
+
+import com.dmdev.linterceptor.GlobalInterceptor;
 import com.dmdev.util.HibernateUtil;
 import com.dmdev.util.TestDataImporter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +20,10 @@ public class HibernateRunner {
     public static void main(String[] args) throws SQLException {
 
         try (SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
-             Session session1 = sessionFactory.openSession();
+             Session session1 = sessionFactory
+//                     .withOptions()
+//                     .interceptor(new GlobalInterceptor())
+                     .openSession();
              Session session2 = sessionFactory.openSession()) {
             TestDataImporter.importData(sessionFactory);
             session1.beginTransaction();
