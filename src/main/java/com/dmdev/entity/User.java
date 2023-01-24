@@ -8,6 +8,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.*;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import javax.persistence.*;
 import javax.persistence.CascadeType;
@@ -34,7 +36,7 @@ import static com.dmdev.util.StringUtils.SPACE;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "username")
-@ToString(exclude = {"company", "profile", "userChats", "payments"})
+@ToString(exclude = {"company", "userChats", "payments"})
 @Builder
 @Entity
 @Table(name = "users", schema = "public")
@@ -47,12 +49,14 @@ import static com.dmdev.util.StringUtils.SPACE;
                 entity = User.class,association = "payments",mode=FetchMode.JOIN
         )
 })
+@Audited
 public class User implements Comparable<User>, BaseEntity<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotAudited
     @AttributeOverride(name = "birthDate", column = @Column(name = "birth_date"))
     private PersonalInfo personalInfo;
 
@@ -62,27 +66,32 @@ public class User implements Comparable<User>, BaseEntity<Long> {
     @Type(type = "dmdev")
     private String info;
 
+    @NotAudited
     @Enumerated(EnumType.STRING)
     private Role role;
 
+//    @NotAudited
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id") // company_id
     private Company company;
-
-    @OneToOne(
-            mappedBy = "user",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY
-    )
-    private Profile profile;
+//
+//    @OneToOne(
+//            mappedBy = "user",
+//            cascade = CascadeType.ALL,
+//            fetch = FetchType.LAZY
+//    )
+//    @NotAudited
+//    private Profile profile;
 
     @Builder.Default
     @OneToMany(mappedBy = "user")
+    @NotAudited
     private List<UserChat> userChats = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "receiver")
 //    @Fetch(FetchMode.SUBSELECT)
+    @NotAudited
     private List<Payment> payments = new ArrayList<>();
 
     @Override

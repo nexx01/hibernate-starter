@@ -25,8 +25,8 @@ public class HibernateRunner {
 //                     .interceptor(new GlobalInterceptor())
                      .openSession();
              Session session2 = sessionFactory.openSession()) {
-            TestDataImporter.importData(sessionFactory);
             session1.beginTransaction();
+            TestDataImporter.importData(sessionFactory);
             session1.createQuery("select p from Payment  p")
                     .list();
 

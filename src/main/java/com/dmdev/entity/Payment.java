@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -19,6 +21,7 @@ import java.time.Instant;
 //@OptimisticLocking(type = OptimisticLockType.ALL)
 //@OptimisticLocking(type = OptimisticLockType.DIRTY)
 //@DynamicUpdate
+@Audited
 public class Payment extends AuditableEntity<Long> {
 
     @Id
@@ -31,6 +34,7 @@ public class Payment extends AuditableEntity<Long> {
     private Long version;
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
+//    @NotAudited
     private User receiver;
 //
 //    @PrePersist
