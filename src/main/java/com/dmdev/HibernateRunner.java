@@ -1,45 +1,63 @@
 package com.dmdev;
 
 import com.dmdev.entity.Payment;
-
-
-import com.dmdev.linterceptor.GlobalInterceptor;
 import com.dmdev.util.HibernateUtil;
-import com.dmdev.util.TestDataImporter;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
+import org.hibernate.ReplicationMode;
 import org.hibernate.SessionFactory;
+import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.AuditReaderFactory;
+import org.hibernate.envers.query.AuditEntity;
 
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
 
 @Slf4j
 public class HibernateRunner {
 
 
-    //    @Transactional
     public static void main(String[] args) throws SQLException {
 
-        try (SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
-             Session session1 = sessionFactory
-//                     .withOptions()
-//                     .interceptor(new GlobalInterceptor())
-                     .openSession();
-             Session session2 = sessionFactory.openSession()) {
-            session1.beginTransaction();
-            TestDataImporter.importData(sessionFactory);
-            session1.createQuery("select p from Payment  p")
-                    .list();
+        try (SessionFactory sessionFactory = HibernateUtil.buildSessionFactory()) {
 
-            Payment payment = session1.find(Payment
-                    .class, 1L);
+            try (var session = sessionFactory.openSession()) {
+                session.beginTransaction();
 
-            payment.setAmount(payment.getAmount() + 1);
-            session1.save(payment);
+                Payment payment = session.find(Payment
+                        .class, 1L);
 
-            session1.getTransaction().commit();
+                payment.setAmount(payment.getAmount() + 1);
+                session.save(payment);
+
+                session.getTransaction().commit();
+            }
+
+
+            try (var session2 = sessionFactory.openSession()) {
+                session2.beginTransaction();
+
+                AuditReader auditReader = AuditReaderFactory.get(session2);
+                Payment oldPayment = auditReader.find(Payment.class, 1L, 1L);
+//                Payment oldPayment = auditReader.find(Payment.class, 1L, new Date(1674535185209L));
+//                session2.replicate(oldPayment, ReplicationMode.OVERWRITE);
+
+                List resultList = auditReader.createQuery()
+                        .forEntitiesAtRevision(Payment.class, 400L)
+                        .add(AuditEntity.property("amount").ge(450))
+                        .add(AuditEntity.property("id").ge(6L)
+                        )
+                        .addProjection(AuditEntity.property("amount"))
+                        .getResultList();
+
+
+                session2.getTransaction().commit();
+            }
 
         }
     }
+
+    ;
 }
 /*/
 
