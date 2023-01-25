@@ -1,5 +1,6 @@
 package com.dmdev;
 
+import com.dmdev.dao.PaymentRepository;
 import com.dmdev.entity.Payment;
 import com.dmdev.entity.User;
 import com.dmdev.util.HibernateUtil;
@@ -28,39 +29,8 @@ public class HibernateRunner {
             try (var session = sessionFactory.openSession()) {
                 session.beginTransaction();
 
-                user = session.find(User.class, 1L);
-                user.getCompany().getName();
-                user.getUserChats().size();
-                var user1 = session.find(User.class, 1L);
-
-                List payments = session.createQuery("select p from Payment " +
-                                "p where p.receiver.id=:userId")
-                        .setParameter("userId", 1L)
-                        .setCacheable(true)
-//                        .setCacheRegion("queries")
-//                        .setHint(QueryHints.HINT_CACHEABLE,true)
-                        .getResultList();
-
-                System.out.println(sessionFactory.getStatistics());
-                System.out.println(sessionFactory.getStatistics().getCacheRegionStatistics("Users"));
-
-                session.getTransaction().commit();
-            }
-
-            try (var session = sessionFactory.openSession()) {
-                session.beginTransaction();
-
-                User user2 = session.find(User.class, 1L);
-                user.getCompany().getName();
-                user.getUserChats().size();
-
-                List payments = session.createQuery("select p from Payment " +
-                                "p where p.receiver.id=:userId")
-                        .setParameter("userId", 1L)
-                        .setCacheable(true)
-//                        .setCacheRegion("queries")
-//                        .setHint(QueryHints.HINT_CACHEABLE,true)
-                        .getResultList();
+                var paymentRepository = new PaymentRepository(sessionFactory);
+                paymentRepository.finById(1L).ifPresent(System.out::println);
 
                 session.getTransaction().commit();
             }
