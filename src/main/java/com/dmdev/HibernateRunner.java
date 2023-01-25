@@ -10,6 +10,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
+import org.hibernate.jpa.QueryHints;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -27,10 +28,21 @@ public class HibernateRunner {
             try (var session = sessionFactory.openSession()) {
                 session.beginTransaction();
 
-                 user = session.find(User.class, 1L);
+                user = session.find(User.class, 1L);
                 user.getCompany().getName();
                 user.getUserChats().size();
                 var user1 = session.find(User.class, 1L);
+
+                List payments = session.createQuery("select p from Payment " +
+                                "p where p.receiver.id=:userId")
+                        .setParameter("userId", 1L)
+                        .setCacheable(true)
+//                        .setCacheRegion("queries")
+//                        .setHint(QueryHints.HINT_CACHEABLE,true)
+                        .getResultList();
+
+                System.out.println(sessionFactory.getStatistics());
+                System.out.println(sessionFactory.getStatistics().getCacheRegionStatistics("Users"));
 
                 session.getTransaction().commit();
             }
@@ -40,8 +52,15 @@ public class HibernateRunner {
 
                 User user2 = session.find(User.class, 1L);
                 user.getCompany().getName();
-
                 user.getUserChats().size();
+
+                List payments = session.createQuery("select p from Payment " +
+                                "p where p.receiver.id=:userId")
+                        .setParameter("userId", 1L)
+                        .setCacheable(true)
+//                        .setCacheRegion("queries")
+//                        .setHint(QueryHints.HINT_CACHEABLE,true)
+                        .getResultList();
 
                 session.getTransaction().commit();
             }
