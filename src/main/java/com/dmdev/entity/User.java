@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -50,6 +51,7 @@ import static com.dmdev.util.StringUtils.SPACE;
         )
 })
 @Audited
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class User implements Comparable<User>, BaseEntity<Long> {
 
     @Id
@@ -86,6 +88,7 @@ public class User implements Comparable<User>, BaseEntity<Long> {
     @Builder.Default
     @OneToMany(mappedBy = "user")
     @NotAudited
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private List<UserChat> userChats = new ArrayList<>();
 
     @Builder.Default
