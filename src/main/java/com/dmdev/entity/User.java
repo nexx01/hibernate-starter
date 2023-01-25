@@ -50,8 +50,9 @@ import static com.dmdev.util.StringUtils.SPACE;
                 entity = User.class,association = "payments",mode=FetchMode.JOIN
         )
 })
+
 @Audited
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE,region = "Users")
 public class User implements Comparable<User>, BaseEntity<Long> {
 
     @Id

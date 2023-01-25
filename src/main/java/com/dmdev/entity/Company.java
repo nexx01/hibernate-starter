@@ -37,7 +37,7 @@ import java.util.TreeMap;
 @Builder
 @Entity
 @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE,region = "Companies")
 public class Company {
 
     @Id
