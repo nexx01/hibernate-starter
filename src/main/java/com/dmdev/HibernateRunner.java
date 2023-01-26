@@ -7,12 +7,16 @@ import com.dmdev.util.HibernateUtil;
 import com.dmdev.util.TestDataImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.ReplicationMode;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.jpa.QueryHints;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
@@ -27,12 +31,20 @@ public class HibernateRunner {
 //            TestDataImporter.importData(sessionFactory);
             User user = null;
 //            try (var session = sessionFactory.openSession()) {
-            var session = sessionFactory.getCurrentSession(); //При использовании ThreadLocalCurrentContext
+//            var session = sessionFactory.getCurrentSession(); //При использовании ThreadLocalCurrentContext
             //не обязательно закрывать сессию она сама закроется при коммит или ролбек
 
+            //Threadlocal не работает при неблокирующих стратегиях
+            //example with springReactive
+            var session = (Session)Proxy.newProxyInstance(SessionFactory.class.getClassLoader(), new Class[]{Session.class}, new InvocationHandler() {
+                @Override
+                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    return method.invoke(sessionFactory.getCurrentSession(), args);
+                }
+            });
                 session.beginTransaction();
 
-                var paymentRepository = new PaymentRepository(sessionFactory);
+            var paymentRepository = new PaymentRepository(session);
                 paymentRepository.finById(1L).ifPresent(System.out::println);
 
                 session.getTransaction().commit();
