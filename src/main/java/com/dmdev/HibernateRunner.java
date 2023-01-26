@@ -24,18 +24,18 @@ public class HibernateRunner {
     public static void main(String[] args) throws SQLException {
 
         try (SessionFactory sessionFactory = HibernateUtil.buildSessionFactory()) {
-            TestDataImporter.importData(sessionFactory);
+//            TestDataImporter.importData(sessionFactory);
             User user = null;
-            try (var session = sessionFactory.openSession()) {
+//            try (var session = sessionFactory.openSession()) {
+            var session = sessionFactory.getCurrentSession(); //При использовании ThreadLocalCurrentContext
+            //не обязательно закрывать сессию она сама закроется при коммит или ролбек
+
                 session.beginTransaction();
 
                 var paymentRepository = new PaymentRepository(sessionFactory);
                 paymentRepository.finById(1L).ifPresent(System.out::println);
 
                 session.getTransaction().commit();
-            }
-
-
         }
     }
 

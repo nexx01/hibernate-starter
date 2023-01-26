@@ -14,11 +14,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public abstract class RepositoryBase<K extends Serializable,E extends BaseEntity<K>> implements Repository<K,E> {
     private final Class<E> clazz;
+//    private final SessionFactory sessionFactory;
     private final SessionFactory sessionFactory;
 
     @Override
     public E save(E entity) {
-        @Cleanup var session = sessionFactory.openSession();
+          var session = sessionFactory.getCurrentSession();
 
         session.save(entity);
         return entity;
@@ -26,27 +27,27 @@ public abstract class RepositoryBase<K extends Serializable,E extends BaseEntity
 
     @Override
     public void delete(K id) {
-        @Cleanup var session = sessionFactory.openSession();
+          var session = sessionFactory.getCurrentSession();
         session.delete(id);
         session.flush();
     }
 
     @Override
     public void update(E entity) {
-        @Cleanup var session = sessionFactory.openSession();
+          var session = sessionFactory.getCurrentSession();
         session.merge(entity);
     }
 
     @Override
     public Optional<E> finById(K id) {
-        @Cleanup var session = sessionFactory.openSession();
+          var session = sessionFactory.getCurrentSession();
 
         return Optional.ofNullable(session.find(clazz, id));
     }
 
     @Override
     public List<E> findAll() {
-        @Cleanup var session = sessionFactory.openSession();
+          var session = sessionFactory.getCurrentSession();
 
 
         CriteriaBuilder cb = session.getCriteriaBuilder();
