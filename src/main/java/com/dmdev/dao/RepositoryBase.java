@@ -8,6 +8,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -36,8 +37,8 @@ public abstract class RepositoryBase<K extends Serializable,E extends BaseEntity
     }
 
     @Override
-    public Optional<E> finById(K id) {
-        return Optional.ofNullable(entityManager.find(clazz, id));
+    public Optional<E> findById(K id, Map<String, Object> poperties) {
+        return Optional.ofNullable(entityManager.find(clazz,id,poperties));
     }
 
     @Override
@@ -52,5 +53,9 @@ public abstract class RepositoryBase<K extends Serializable,E extends BaseEntity
 
 //        return session.createQuery("select p from E p", clazz)
 //                .getResultList();
+    }
+
+    public EntityManager getEntityManager() {
+        return entityManager;
     }
 }

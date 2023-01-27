@@ -1,34 +1,41 @@
 package com.dmdev;
 
+import com.dmdev.dao.CompanyRepository;
 import com.dmdev.dao.PaymentRepository;
-import com.dmdev.entity.Payment;
+import com.dmdev.dao.UserRepository;
+import com.dmdev.dto.UserCreateDTO;
+import com.dmdev.entity.PersonalInfo;
+import com.dmdev.entity.Role;
 import com.dmdev.entity.User;
+import com.dmdev.interceptor.TransactionInterceptor;
+import com.dmdev.mapper.CompanyReadMapper;
+import com.dmdev.mapper.UserCreateDtoMapper;
+import com.dmdev.mapper.UserReadDtoMapper;
+import com.dmdev.service.UserService;
 import com.dmdev.util.HibernateUtil;
 import com.dmdev.util.TestDataImporter;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.ReplicationMode;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.implementation.MethodDelegation;
+import net.bytebuddy.matcher.ElementMatchers;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
-import org.hibernate.envers.query.AuditEntity;
-import org.hibernate.jpa.QueryHints;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
 
 @Slf4j
 public class HibernateRunner {
 
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
 
         try (SessionFactory sessionFactory = HibernateUtil.buildSessionFactory()) {
-//            TestDataImporter.importData(sessionFactory);
+            TestDataImporter.importData(sessionFactory);
             User user = null;
 //            try (var session = sessionFactory.openSession()) {
 //            var session = sessionFactory.getCurrentSession(); //При использовании ThreadLocalCurrentContext
@@ -36,18 +43,74 @@ public class HibernateRunner {
 
             //Threadlocal не работает при неблокирующих стратегиях
             //example with springReactive
+
+
             var session = (Session)Proxy.newProxyInstance(SessionFactory.class.getClassLoader(), new Class[]{Session.class}, new InvocationHandler() {
                 @Override
                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                     return method.invoke(sessionFactory.getCurrentSession(), args);
                 }
             });
-                session.beginTransaction();
+//                session.beginTransaction();
+
+            var companyRepository = new CompanyRepository(session);
+
+            CompanyReadMapper companyReadMapper = new CompanyReadMapper();
+            UserReadDtoMapper userReadDtoMapper = new UserReadDtoMapper(companyReadMapper);
+            UserCreateDtoMapper userCreateDtoMapper = new UserCreateDtoMapper(companyRepository);
+
+
+            UserRepository userRepository = new UserRepository(session);
+//            UserService userService =
+//                    new UserService(userRepository, userReadDtoMapper, userCreateDtoMapper);
+
+            var transactionalInterceptor = new TransactionInterceptor(sessionFactory);
+            UserService userService = new ByteBuddy()
+                    .subclass(UserService.class)
+                    .method(ElementMatchers.any())
+                    .intercept(MethodDelegation.to(transactionalInterceptor))
+                    .make()
+                    .load(UserService.class.getClassLoader())
+                    .getLoaded()
+                    .getDeclaredConstructor(UserRepository.class, UserReadDtoMapper.class, UserCreateDtoMapper.class)
+                    .newInstance(userRepository, userReadDtoMapper, userCreateDtoMapper);
+
+
+            var userCreateDTO = new UserCreateDTO(
+                    PersonalInfo.builder()
+                            .firstname("Liza")
+                            .lastname("Stepanova")
+                            .birthDate(LocalDate.now())
+                            .build(),
+                    "lisa@gmail.com"
+                            ,null,
+                    Role.USER,
+                    1
+            );
+
+
+//            var userCreateDTO2 = new UserCreateDTO(
+//                    PersonalInfo.builder()
+//                            .firstname("Liza")
+//                            .lastname("Stepanova")
+//                            .birthDate(LocalDate.now())
+//                            .build(),
+//                    "lisa2@gmail.com"
+//                    ,null,
+//                    Role.USER,
+//                    1
+//            );
+            userService.create(userCreateDTO);
+//            userService.create(userCreateDTO2);
+//            userService.findById(1L).ifPresent(System.out::println);
+
+
+
 
             var paymentRepository = new PaymentRepository(session);
-                paymentRepository.finById(1L).ifPresent(System.out::println);
-
-                session.getTransaction().commit();
+//                paymentRepository.findById(1L).ifPresent(System.out::println);
+//
+//                session.getTransaction().commit();
         }
     }
 

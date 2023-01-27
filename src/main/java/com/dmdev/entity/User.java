@@ -33,6 +33,13 @@ import static com.dmdev.util.StringUtils.SPACE;
                 @NamedSubgraph(name = "chats",attributeNodes = @NamedAttributeNode("chat"))
         }
 )
+
+@NamedEntityGraph(
+        name="withCompany",
+        attributeNodes = {
+                @NamedAttributeNode("company")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
