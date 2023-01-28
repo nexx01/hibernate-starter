@@ -2,10 +2,16 @@ package com.dmdev.dto;
 
 import com.dmdev.entity.PersonalInfo;
 import com.dmdev.entity.Role;
+import com.dmdev.validation.UpdateCheck;
 
-public record UserCreateDTO (PersonalInfo personalInfo,
-                            String username,
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+public record UserCreateDTO (@Valid PersonalInfo personalInfo,
+                            @NotNull String username,
                             String info,
+                            @NotNull(groups = UpdateCheck.class)
                             Role role,
+//                            @ValidCompany
                             Integer companyId){
 }

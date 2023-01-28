@@ -44,7 +44,6 @@ public class HibernateRunner {
             //Threadlocal не работает при неблокирующих стратегиях
             //example with springReactive
 
-
             var session = (Session)Proxy.newProxyInstance(SessionFactory.class.getClassLoader(), new Class[]{Session.class}, new InvocationHandler() {
                 @Override
                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -84,7 +83,8 @@ public class HibernateRunner {
                             .build(),
                     "lisa@gmail.com"
                             ,null,
-                    Role.USER,
+//                    Role.USER,
+                    null,
                     1
             );
 

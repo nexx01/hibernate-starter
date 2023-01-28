@@ -16,6 +16,8 @@ import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,9 +70,11 @@ public class User implements Comparable<User>, BaseEntity<Long> {
 
     @NotAudited
     @AttributeOverride(name = "birthDate", column = @Column(name = "birth_date"))
+//    @Valid
     private PersonalInfo personalInfo;
 
     @Column(unique = true)
+//    @NotNull
     private String username;
 
     @Type(type = "dmdev")
