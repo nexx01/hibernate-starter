@@ -18,6 +18,8 @@ public class TestDataImporter {
     public void importData(SessionFactory sessionFactory) {
         @Cleanup Session session = sessionFactory.openSession();
 
+        session.beginTransaction();
+
         Company microsoft = saveCompany(session, "Microsoft");
         Company apple = saveCompany(session, "Apple");
         Company google = saveCompany(session, "Google");
@@ -51,6 +53,9 @@ public class TestDataImporter {
         savePayment(session, dianeGreene, 300);
         savePayment(session, dianeGreene, 300);
         savePayment(session, dianeGreene, 300);
+
+        session.getTransaction().commit();
+        session.close();
     }
 
     private Company saveCompany(Session session, String name) {

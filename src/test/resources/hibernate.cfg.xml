@@ -17,5 +17,9 @@
         <mapping class="com.dmdev.entity.Chat"/>
         <mapping class="com.dmdev.entity.UserChat"/>
         <mapping class="com.dmdev.entity.Payment"/>
+        <mapping class="com.dmdev.experiments.syncBidirection.PostComment"/>
+        <mapping class="com.dmdev.experiments.syncBidirection.Post"/>
+        <mapping class="com.dmdev.experiments.syncBidirection.PostDetails"/>
+        <mapping class="com.dmdev.experiments.syncBidirection.Post2"/>
     </session-factory>
 </hibernate-configuration>

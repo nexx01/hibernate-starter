@@ -28,6 +28,15 @@ import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
+//RoadMap
+//Transaction management Bitronix Atomics Распределенные транзакции (two-phase commit)
+// MapStruct
+// Spring Data реализация @Transaction
+// Spring Boot
+// Java Persistance with Hibernate
+//Hipster
+
+
 @Slf4j
 public class HibernateRunner {
 

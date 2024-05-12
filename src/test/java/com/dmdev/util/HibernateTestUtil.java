@@ -8,7 +8,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @UtilityClass
 public class HibernateTestUtil {
 
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13");
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13")
+            .withReuse(true)
+            ;
 
     static {
         postgres.start();
