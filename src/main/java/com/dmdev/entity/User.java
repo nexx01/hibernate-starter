@@ -87,6 +87,7 @@ public class User implements Comparable<User>, BaseEntity<Long> {
 //    @NotAudited
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id") // company_id
+
     private Company company;
 //
 //    @OneToOne(

@@ -5,12 +5,16 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.util.Collections;
+
 @UtilityClass
 public class HibernateTestUtil {
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13")
-            .withReuse(true)
-            ;
+            .withEnv(Collections.singletonMap("ACCEPT_EULA", "Y"))
+            .withTmpFs(Collections.singletonMap("/testtmpfs", "rw"))
+            .withReuse(true);
+
 
     static {
         postgres.start();

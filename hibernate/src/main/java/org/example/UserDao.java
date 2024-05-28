@@ -1,10 +1,10 @@
 package org.example;
 
-import models.Auto;
-import models.User;
+import org.example.firstEntity.Auto;
+import org.example.firstEntity.User;
+import org.example.util.HibernateSessionFactoryUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import utils.HibernateSessionFactoryUtil;
 import java.util.List;
 
 public class UserDao {

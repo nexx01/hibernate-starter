@@ -1,6 +1,7 @@
 package org.example.util;
 
 import org.example.firstEntity.Auto;
+import org.example.firstEntity.SomeEntityWithUUIDGenerator;
 import org.example.firstEntity.User;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -14,10 +15,12 @@ public class HibernateSessionFactoryUtil {
         if (sessionFactory == null) {
             try {
             Configuration configuration = new Configuration().configure();
-            configuration.addAnnotatedClass(User.class);
-            configuration.addAnnotatedClass(Auto.class);
+//            configuration.addAnnotatedClass(User.class);
+//            configuration.addAnnotatedClass(Auto.class);
+            configuration.addAnnotatedClass(SomeEntityWithUUIDGenerator.class);
 
-            StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
+            StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder()
+                    .applySettings(configuration.getProperties());
             sessionFactory=configuration.buildSessionFactory(builder.build());
             } catch (Exception e) {
                 System.out.println("Исключение!" + e);

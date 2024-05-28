@@ -12,7 +12,16 @@ public class H2CreateExample {
     public static void main(String[] args) {
         var h2CreateExample = new H2CreateExample();
         h2CreateExample.createTable();
+
+        try (Connection connection = H2JDBCUtils.getConnection()) {
+            var statement = connection.createStatement();
+            statement.execute(createTableSQL);
+        } catch (SQLException ex){
+            H2JDBCUtils.printSQLException(ex);
+        }
     }
+
+
 
     private void createTable() {
         System.out.println(createTableSQL);
